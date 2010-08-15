@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use TV::BroadCast;
+use TV::BroadCast::Synopsis;
+use TV::Channel;
+use TV::Programme;
+use TV::Category;
+use Time::Piece;
+use Time::Piece::MySQL;
+use XML::Twig;
+
+my $twig = XML::Twig->new(
+    twig_handlers => {
+        channel   => \&parse_channel,
+        programme => \&parse_programme,
+    }
+);
+
+$twig->parsefile("/tmp/tv.xml");
+
+sub parse_channel {
+    my ( $twig, $plant ) = @_;
+
+    my $channelid = $plant->att('id');
+    my $name      = $plant->first_child_trimmed_text('display-name');
+
+    TV::Channel->find_or_create( { name => $name, xmltv_id => $channelid } );
+    $twig->purge;
+}
+
+sub parse_programme {
+    my ( $twig, $plant ) = @_;
+
+    my $start   = $plant->att('start');
+    my $end     = $plant->att('stop');
+    my $channel = $plant->att('channel');
+
+    my $title    = $plant->first_child_trimmed_text('title');
+    my $category = $plant->first_child_trimmed_text('category');
+    my $subtitle = $plant->first_child_trimmed_text('sub-title');
+    my $synopsis = $plant->first_child_trimmed_text('desc');
+
+    my @credits = $plant->children('credits');
+
+    my ( @stars, @directors );
+    if ( scalar @credits > 0 ) {
+        if ( my $credits = $plant->first_child("credits") ) {
+            foreach my $element ( $credits->children("actor") ) {
+                push @stars, $element->text;
+            }
+
+            foreach my $element ( $credits->children("director") ) {
+                push @directors, $element->text;
+            }
+        }
+    }
+
+    my $start_obj =
+      Time::Piece->from_mysql_timestamp( substr( $start, 0, 14 ) );
+    my $end_obj = Time::Piece->from_mysql_timestamp( substr( $end, 0, 14 ) );
+    my ($category_obj) = TV::Category->find_or_create( { name => $category } );
+    my ($channel_obj)  = TV::Channel->for_xmltv_id($channel);
+
+    my $programme =
+      TV::Programme->find_or_create(
+        { title => $title, category => $category_obj->id } );
+
+    my $broadcast = TV::BroadCast->find_or_create(
+        {
+            programme      => $programme->id,
+            channel        => $channel_obj->id,
+            broadcast_date => $start_obj->ymd,
+            start_time     => $start_obj->hms,
+            end_time       => $end_obj->hms,
+            sub_title      => $subtitle,
+        }
+    );
+
+    my $synopsis_obj = TV::BroadCast::Synopsis->find_or_create(
+        {
+            broadcast => $broadcast->id,
+            programme => $programme->id,
+            channel   => $channel_obj->id,
+            synopsis  => $synopsis,
+        }
+    );
+  
+    $broadcast->synopsis( $synopsis_obj->id );
+    $programme->add_stars( \@stars );
+    $programme->add_directors( \@directors );
+
+    $twig->purge;
+}

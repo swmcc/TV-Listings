@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use TV::Channel;
+use TV::BroadCast;
+use TV::Template;
+use SWM::Date;
+
+my @channels = TV::Channel->active;
+my $date     = SWM::Date->today - 1; 
+my $tmp      = TV::Template->new;
+
+my @dates;
+push @dates, ( $date + $_ ) for ( 1 .. 30 );
+
+foreach my $channel (@channels) {
+    my $channelid = $channel->id;
+    printf "Doing %s\n", $channel->name;
+    foreach my $date (@dates) {
+        printf "... %s\n", $date;
+        my @broadcasts = TV::BroadCast->search(
+            {
+                channel        => $channel->id,
+                broadcast_date => $date,
+            }
+        );
+
+        next if @broadcasts == 0;
+
+        my $vars = {
+            channel    => $channel,
+            date       => $date,
+            broadcasts => \@broadcasts,
+        };
+
+        my $output_file = sprintf "/var/templates/lib/whatisonthe.tv/channel_listings/%d/%s",
+          $channel->id, $date;
+        $tmp->process( 'channel_day_listing', $vars, $output_file );
+    }
+}

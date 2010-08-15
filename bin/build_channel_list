@@ -1,0 +1,69 @@
+#!/usr/bin/perl 
+
+#------------------------------------------------------------------------------
+#
+# Copyright  (c) SWM  2006
+#
+#------------------------------------------------------------------------------
+#
+# Modification History
+#
+# Auth    Date       Description
+# ------  ---------  ----------------------------------------------------------
+# SWM     05 Sep 06  Now only lists channels that we have listings for. 
+#                      Renamed to channel_list.
+# SWM     11 Aug 06  Wrote this
+#------------------------------------------------------------------------------
+
+=head1 NAME
+
+add_channels - One line statement. 
+
+=head1 SYNOPSIS
+
+ /usr/local/bin/tv/build_channel_list
+
+=head1 DESCRIPTION
+
+Just builds a smiple static html file of the channels we have listings for.
+This page shouldn't be used much, if at all. Its just here so that I (SWM)
+can use it to navigate the sites until I design a proper interface.
+
+=head1 BUGS
+
+Nothing Known.
+
+=head1 TODO
+
+=over 4
+
+=item * Nothing. 
+
+=back
+
+=cut
+
+#------------------------------------------------------------------------------
+use strict;
+use warnings;
+use TV::Template;
+use TV::Channel;
+use SWM::Date;
+
+my $date = SWM::Date->today;
+
+my @channels;
+foreach my $ch ( TV::Channel->active ) {
+   my $listing_file = sprintf("/var/templates/lib/whatisonthe.tv/channel_listings/%d/%s", $ch->id, $date);
+   if ( -e $listing_file ) {
+      push @channels, $ch;    
+   }    
+}    
+
+my $vars = {
+  channels => \@channels,
+};
+
+my $tmp = TV::Template->new;
+   $tmp->process('channel_list', $vars, '/web/whatisonthe.tv/www/channel_list.html') 
+

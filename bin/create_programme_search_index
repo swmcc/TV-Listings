@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use TV::Programme;
+use KinoSearch::InvIndexer;
+use KinoSearch::Analysis::PolyAnalyzer;
+
+my $analyzer = KinoSearch::Analysis::PolyAnalyzer->new( language => 'en' );
+
+my $invindexer = KinoSearch::InvIndexer->new(
+   invindex => '/home/swm/tv/index',
+   create   => 1,
+   analyzer => $analyzer,
+);
+
+$invindexer->spec_field(
+  name  => 'title',
+  boost => 3,
+);
+
+$invindexer->spec_field(
+  name  => 'id',
+  indexed => 0,
+);
+
+$invindexer->spec_field(
+  name  => 'category',
+  indexed => 1,
+);
+
+$invindexer->spec_field( name => 'bodytext', vectorized => 1, indexed => 1 );
+
+$invindexer->spec_field(
+  name    => 'url',
+  indexed => 0,
+);
+
+foreach my $prog ( TV::Programme->retrieve_all ) {
+  my $title = $prog->title;
+  my $id    = $prog->id;
+  my $doc   = $invindexer->new_doc;
+
+  $doc->set_value( title    => $title );
+  #$doc->set_value( bodytext => $bodytext );
+  $doc->set_value( id => $id );
+  $doc->set_value( url => "/x/programme/$id" );
+  $doc->set_value( category => $prog->category->name );
+
+  $invindexer->add_doc($doc);
+}
+
+$invindexer->finish;

@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use KinoSearch::InvIndexer;
+use KinoSearch::Analysis::PolyAnalyzer;
+use SWM::Date;
+use TV::Database;
+use TV::BroadCast;
+
+my $analyzer = KinoSearch::Analysis::PolyAnalyzer->new( language => 'en' );
+
+my $invindexer = KinoSearch::InvIndexer->new(
+   invindex => '/home/swm/tv/synopsis_index',
+   create   => 1,
+   analyzer => $analyzer,
+);
+
+$invindexer->spec_field(
+  name  => 'title',
+  indexed => 0,
+);
+
+$invindexer->spec_field(
+  name  => 'id',
+  indexed => 0,
+);
+
+$invindexer->spec_field(
+  name  => 'category',
+  indexed => 0,
+);
+
+$invindexer->spec_field( name => 'synopsis', indexed => 1 );
+
+$invindexer->spec_field(
+  name    => 'url',
+  indexed => 0,
+);
+
+my $dbh = TV::Database->new;
+
+my $q_get_programmes = $dbh->prepare(q{
+  SELECT id
+    FROM broadcasts
+   WHERE broadcast_date >= ? 
+});    
+
+my @progs = map { TV::BroadCast->retrieve($_) } @{ $dbh->selectcol_arrayref($q_get_programmes, undef, SWM::Date->today) };
+
+foreach my $prog ( @progs ) {
+
+  next if $prog->channel->active eq "n";  
+  my $title = $prog->programme->title;
+  my $synopsis = $prog->synopsis->synopsis;
+  my $id    = $prog->programme->id;
+  my $doc   = $invindexer->new_doc;
+
+  $doc->set_value( synopsis => $synopsis );
+  $doc->set_value( title => $title );
+  $doc->set_value( id => $id );
+  $doc->set_value( url => "/x/programme/$id" );
+  $doc->set_value( category => $prog->programme->category->name );
+
+  $invindexer->add_doc($doc);
+}
+
+$invindexer->finish;

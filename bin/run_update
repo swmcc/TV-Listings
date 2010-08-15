@@ -1,0 +1,7 @@
+#!/bin/sh
+
+/usr/bin/tv_grab_uk_rt > /tmp/tv.xml;
+/usr/local/bin/tv/parse_xmltv_feed;
+/usr/local/bin/tv/create_programme_search_index;
+/usr/local/bin/tv/build_channel_html;
+/usr/local/bin/tv/create_synopsis_programme_search;
