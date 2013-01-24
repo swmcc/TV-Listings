@@ -2,7 +2,7 @@ package TV::Star;
 
 #------------------------------------------------------------------------------
 #
-# Copyright  (c) SWM 2003 - 2004 
+# Copyright  (c) SWM 2003 - 2013
 #
 #------------------------------------------------------------------------------
 #
@@ -10,6 +10,7 @@ package TV::Star;
 #
 # Auth    Date       Description
 # ------  ---------  ----------------------------------------------------------
+# SWM     24 Jan 13  Renamed table to stars.
 # SWM     22 Mar 04  Amended the image to check if the image exists in 
 #                      /web/whatisonthe.tv and not /web/tv.theotherdomain.com
 # SWM     20 Mar 04  Added find_or_create again. Was failing tests! 
@@ -77,7 +78,7 @@ use strict;
 use warnings;
 
 use base qw(TV::DBI);
-__PACKAGE__->table('star');
+__PACKAGE__->table('stars');
 __PACKAGE__->columns( Primary => 'id' );
 __PACKAGE__->columns( All     => qw/name imdb_id/ );
 

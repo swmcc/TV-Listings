@@ -2,7 +2,7 @@ package TV::Channel;
 
 #------------------------------------------------------------------------------
 #
-# Copyright  (c) SWM 2006 
+# Copyright  (c) SWM 2006 - 2013
 #
 #------------------------------------------------------------------------------
 #
@@ -10,6 +10,7 @@ package TV::Channel;
 #
 # Auth    Date       Description
 # ------  ---------  ----------------------------------------------------------
+# SWM     24 Jan 13  Renamed table to channels    
 # SWM     11 Aug 06  Wrote this
 #------------------------------------------------------------------------------
 
@@ -32,7 +33,7 @@ use strict;
 use warnings;
 
 use base qw(TV::DBI);
-TV::Channel->table('channel');
+TV::Channel->table('channels');
 TV::Channel->columns( Primary => 'channelid' );
 TV::Channel->columns( All     => qw/xmltv_id name active/ );
 

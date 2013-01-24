@@ -10,6 +10,7 @@ package TV::Category;
 #
 # Auth    Date       Description
 # ------  ---------  ----------------------------------------------------------
+# SWM     24 Jan 13  Renamed table to categories
 # SWM     
 #------------------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ use strict;
 use warnings;
 
 use base qw(TV::DBI);
-TV::Category->table('category');
+TV::Category->table('categories');
 TV::Category->columns( Primary => 'id' );
 TV::Category->columns( All     => qw/name/ );
 

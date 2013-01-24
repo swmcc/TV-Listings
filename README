@@ -1,3 +1,0 @@
-This code is very old - but it works. If for some made reson you do want to use it then of course feel free however 
-I would use DBIx::Class instead of Class::DBI - just because it is a bit nicer but YMMV. In fact I'd just use whatever
-is in bin/ - am pretty sure that the KinoSearch code wont work anymore though.

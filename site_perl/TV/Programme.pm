@@ -2,7 +2,7 @@ package TV::Programme;
 
 #------------------------------------------------------------------------------
 #
-# Copyright  (c) SWM 2006 
+# Copyright  (c) SWM 2006 - 2013
 #
 #------------------------------------------------------------------------------
 #
@@ -10,6 +10,7 @@ package TV::Programme;
 #
 # Auth    Date       Description
 # ------  ---------  ----------------------------------------------------------
+# SWM     24 Jan 13  Renamed table to programmes
 # SWM     11 Aug 06  Wrote this
 #------------------------------------------------------------------------------
 
@@ -37,7 +38,7 @@ use TV::Director;
 use TV::Programme::Star;
 use TV::Programme::Director;
 
-TV::Programme->table('programme');
+TV::Programme->table('programmes');
 TV::Programme->columns( Primary => 'id' );
 TV::Programme->columns( All     => qw/title category/ );
 TV::Programme->has_many( 'stars', 'TV::Programme::Star' => 'programme' );
