@@ -1,0 +1,90 @@
+#!/usr/bin/perl 
+
+#------------------------------------------------------------------------------
+#
+# Copyright  (c) SWM 2013 
+#
+#------------------------------------------------------------------------------
+#
+# Modification History
+#
+# Auth    Date       Description
+# ------  ---------  ----------------------------------------------------------
+# SWM     26 Jan 13  Wrote this. 
+#------------------------------------------------------------------------------
+
+=head1 NAME
+
+get_imdb - Get IMDB information for a star/director/film
+
+=head1 SYNOPSIS
+
+ /usr/local/bin/get_imdb --asset=star|director|programme --min=id
+
+=head1 DESCRIPTION
+
+Simple script that gets imdb links. I have had this script running in various
+states for close to ten years. I have never really bothered to put in code
+control simply because it was always a 'HACK' script. 
+
+At the current time of writing I just want to get the star information ASAP
+and then I will extend this properly to get directory and programme info.
+
+IMDB don't provide an API so this is bascially a wrapper to the excellent
+IMDB:: CPAN modules. If the layout changes this script will break or cease
+to function.
+
+=head1 BUGS
+
+None Known.
+
+=head1 TODO
+
+=over 4 
+
+=item * Extend as per the synopsis for directors and programmes.
+
+=item * When the bulk of the information is retrieved it should use the objects. 
+
+=back
+
+=cut
+
+use IMDB::Persons;
+use TV::Database;
+
+my $dbh = TV::Database->new();
+
+my $q_select = $dbh->prepare(q{
+  SELECT id, name
+    FROM stars 
+});
+
+my $q_update = $dbh->prepare(q{
+  UPDATE stars SET photo = ? WHERE id = ?
+});
+
+$q_select->execute();
+$q_select->bind_columns( \my $id, \my $name );
+
+while ( $q_select->fetch ) {
+  print STDERR "Doing .....  $name ($id)\n";  
+
+  my $person = new IMDB::Persons(crit => $name);
+
+  if($person->status) {
+    # Grrrr if there is no photo - the call returns 'No Photo'
+
+    my $photo = $person->photo();
+
+    if ( defined $photo && $photo ne 'No Photo' ) {
+      printf STDERR "Got the photo link - %s\n", $person->photo();
+      $q_update->execute($photo, $link);
+    } else {
+      printf STDERR "No photo\n";
+    }
+  } else {
+    printf STDERR "ERROR - %s\n", $person->error;
+  }
+}
+
