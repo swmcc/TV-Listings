@@ -1,4 +1,8 @@
-# TVListings.app
+# TVListings
+
+Parses the XMLTV and puts into a MySQL db
+
+![TEE-VEE](http://f.cl.ly/items/3d0M1Z113y2L2A2r293U/Old-School-TV-television-296019_1544_1500.jpg "TEE-VEE")
 
 ## Description
 
@@ -13,6 +17,10 @@ I gave it a major re-write in 2005 and used XML::Twig. It still uses Class::DBI 
 	MAILTO=whoever@wherever.tld
 	30 4 * * 0,2,4 sh /usr/local/bin/tv_update >> /tmp/error.log 
 
-## 2013
+## Disclaimer
 
-In 2013 I have decided to give this project (along with a few others) a kickstart. I don't intend to change this much (however I did need to change a few database tables). This has worked for the past eight years (at the time of writing) so if it isn't broke don't touch it. Also it is good to have an app written in Perl - keeping it retro ;)
+This is just for personal use. This is not a commerical site. 
+
+## Rewrite
+
+In 2013 I have decided to give this project (along with a few others) a kickstart. I don't intend to change this much (however I did need to change a few database tables). This has worked for the past eight years (at the time of writing) so if it isn't broke don't touch it. Also it is good to have an app written in Perl - keeping it retro ;) If you are going to fork it please ensure you know PERL enough to be able to reverse engineer this. I am more than happy to help with this though.
